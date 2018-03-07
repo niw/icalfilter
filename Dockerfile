@@ -4,6 +4,7 @@ RUN apk add --no-cache \
     cmake \
     g++ \
     gcc \
+    git \
     go \
     libc-dev \
     make \
@@ -31,7 +32,7 @@ RUN mkdir -p libical/build \
 
 COPY *.go ./
 COPY cmd/icalfilterd ./cmd/icalfilterd/
-RUN go install --ldflags '-s -w -extldflags "-static"' github.com/niw/icalfilter/...
+RUN go get --ldflags '-s -w -extldflags "-static"' github.com/niw/icalfilter/...
 
 
 FROM alpine:latest
