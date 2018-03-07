@@ -1,4 +1,4 @@
-NAME = shrinkical
+NAME = icalfilter
 TARGET = $(NAME)
 
 .PHONY: all
@@ -20,11 +20,12 @@ libical/lib/libical.a: vendor/libical/CMakeLists.txt
 		-DICAL_BUILD_DOCS=false \
 		-DICAL_GLIB=false \
 		-DCMAKE_INSTALL_PREFIX=`pwd`/.. \
+		-DCMAKE_DISABLE_FIND_PACKAGE_ICU=true \
 		./../../vendor/libical && \
-	make install
+	$(MAKE) install
 
-$(TARGET): libical/lib/libical.a libical/include/libical/ical.h main.go
-	go build -o $@ --ldflags '-extldflags "-static"'
+$(TARGET): cmd/$(NAME)/main.go $(NAME).go libical/lib/libical.a libical/include/libical/ical.h
+	go build -o $@ $<
 
 .PHONY: docker
 docker:

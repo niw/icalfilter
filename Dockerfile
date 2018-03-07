@@ -1,8 +1,5 @@
 FROM alpine:latest as builder
 
-RUN mkdir -p /build
-WORKDIR build
-
 RUN apk add --no-cache \
     cmake \
     g++ \
@@ -12,8 +9,12 @@ RUN apk add --no-cache \
     make \
     perl
 
-COPY vendor/libical /build/vendor/libical
+RUN mkdir -p /gopath/src/github.com/niw/icalfilter
 
+WORKDIR /gopath/src/github.com/niw/icalfilter
+ENV GOPATH=/gopath
+
+COPY vendor/libical ./vendor/libical/
 RUN mkdir -p libical/build \
     && cd libical/build \
     && cmake \
@@ -24,13 +25,21 @@ RUN mkdir -p libical/build \
         -DICAL_BUILD_DOCS=false \
         -DICAL_GLIB=false \
         -DCMAKE_INSTALL_PREFIX=`pwd`/.. \
+        -DCMAKE_DISABLE_FIND_PACKAGE_ICU=true \
         ./../../vendor/libical \
     && make install
 
-COPY *.go /build
+COPY *.go ./
+COPY cmd/icalfilterd ./cmd/icalfilterd/
+RUN go install --ldflags '-s -w -extldflags "-static"' github.com/niw/icalfilter/...
 
-RUN go build -o shrinkical --ldflags '-extldflags "-static"'
 
-FROM alpine:latest as runner
-COPY --from=builder /build/shrinkical ./
-CMD ./shrinkical
+FROM alpine:latest
+
+RUN apk add --no-cache \
+  ca-certificates
+
+COPY --from=builder /gopath/bin/icalfilterd ./
+
+# Use `PORT` envrionment variable to set listening port, which is compatible with Heroku.
+CMD ./icalfilterd -addr 0.0.0.0 -port $PORT

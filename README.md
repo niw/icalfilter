@@ -1,13 +1,24 @@
-shrinkical
+icalfilter
 ==========
 
-My very first go lang project to shrink large iCalendar file.
+A simple tool that filters a large iCalendar file by removing past events.
 
 Build
 -----
 
-See `Makefile`.
+Check out repository and update `libical` submodule.
+
+    git submodule update --init --recursive
+
+Use `make` to build a `shirinkical` CLI command.
 
     make
 
-This builds a static binary `shrinkical`.
+HTTP server
+-----------
+
+`icalfilterd` is a HTTP deamon that filters a large iClaendar file on the fly.
+
+`make docker` creates a `icalfilter` docker image.
+
+`Dockerfile` works on [Heroku](https://www.heroku.com) [Container Registry & Runtime](https://devcenter.heroku.com/articles/container-registry-and-runtime).
