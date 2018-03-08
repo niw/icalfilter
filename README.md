@@ -10,7 +10,7 @@ Check out repository and update `libical` submodule.
 
     git submodule update --init --recursive
 
-Use `make` to build a `shirinkical` CLI command.
+Use `make` to build a `icalfiler` CLI command.
 
     make
 
