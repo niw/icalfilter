@@ -45,7 +45,7 @@ func main() {
 	http.HandleFunc("/filter", func(w http.ResponseWriter, r *http.Request) {
 		url := r.FormValue("url")
 		if url == "" {
-			writeErrorMessage(w, 400, "url is required")
+			writeErrorMessage(w, http.StatusBadRequest, "url is required")
 			return
 		}
 
@@ -54,11 +54,11 @@ func main() {
 		if monthsStr != "" {
 			m, err := strconv.ParseInt(monthsStr, 10, 0)
 			if err != nil {
-				writeErrorMessage(w, 400, err.Error())
+				writeErrorMessage(w, http.StatusBadRequest, err.Error())
 				return
 			}
 			if m < 0 {
-				writeErrorMessage(w, 400, "months must be positive")
+				writeErrorMessage(w, http.StatusBadRequest, "months must be positive")
 				return
 			}
 			months = int(m)
@@ -66,25 +66,25 @@ func main() {
 
 		resp, err := http.Get(url)
 		if err != nil {
-			writeErrorMessage(w, 500, err.Error())
+			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			writeErrorMessage(w, 500, err.Error())
+			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		if resp.StatusCode != 200 {
-			writeJSON(w, 500, map[string]interface{}{"message": "Fail to GET url.", "status": resp.StatusCode, "response": string(body)})
+		if resp.StatusCode != http.StatusOK {
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"message": "Fail to GET url.", "status": resp.StatusCode, "response": string(body)})
 			return
 		}
 
 		c, err := icalfilter.Parse(string(body))
 		if err != nil {
-			writeErrorMessage(w, 500, err.Error())
+			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		defer c.Close()
@@ -92,7 +92,7 @@ func main() {
 		before := time.Now().AddDate(0, -months, 0)
 		err = c.FilterBefore(before)
 		if err != nil {
-			writeErrorMessage(w, 500, err.Error())
+			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
