@@ -1,27 +1,35 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/niw/icalfilter"
 )
 
 var (
+	// Listening address.
 	addr = flag.String("addr", "127.0.0.1", "Listening address")
+	// Listening port.
 	port = flag.Int("port", 3000, "Listening port")
+	// Request timeout.
+	timeout = flag.Int64("timeout", 5000, "Response timeout in milliseconds")
 )
 
 // Default to filter a calendar by removing 3 months and older events.
 const defaultMonths = 3
+
+// Cache fetch response for this duration.
+const cacheDuration = 5 * time.Minute
+
+// Duration that is reserved for processing.
+const processDuration = 500 * time.Millisecond
 
 func writeErrorMessage(w http.ResponseWriter, statusCode int, message string) {
 	writeJSON(w, statusCode, map[string]string{"error": message})
@@ -35,6 +43,13 @@ func writeJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 
 func main() {
 	flag.Parse()
+
+	f := NewFetcher(cacheDuration)
+
+	fetchTimeout := time.Duration(*timeout) * time.Millisecond
+	if fetchTimeout > processDuration {
+		fetchTimeout = fetchTimeout - processDuration
+	}
 
 	http.HandleFunc("/filter", func(w http.ResponseWriter, r *http.Request) {
 		url := r.FormValue("url")
@@ -58,21 +73,16 @@ func main() {
 			months = int(m)
 		}
 
-		resp, err := http.Get(url)
-		if err != nil {
-			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		defer resp.Body.Close()
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			writeErrorMessage(w, http.StatusInternalServerError, err.Error())
-			return
+		ctx := context.Background()
+		if fetchTimeout > 0 {
+			ctxWithTimeout, cancel := context.WithTimeout(ctx, fetchTimeout)
+			ctx = ctxWithTimeout
+			defer cancel()
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"message": "Fail to GET url.", "status": resp.StatusCode, "response": string(body)})
+		body, statusCode, err := f.Fetch(ctx, url)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{"message": err.Error(), "status": statusCode, "response": string(body)})
 			return
 		}
 
