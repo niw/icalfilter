@@ -30,3 +30,7 @@ $(TARGET): cmd/$(NAME)/main.go $(NAME).go libical/lib/libical.a libical/include/
 .PHONY: docker
 docker:
 	docker build -t $(NAME) .
+
+.PHONY: run
+run: docker
+	docker run --rm -i -t -p 3000:3000 -e PORT=3000 $(NAME)
