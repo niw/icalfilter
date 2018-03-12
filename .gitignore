@@ -3,4 +3,5 @@
 .idea/
 /libical/
 debug
-shrinkical
+icalfilter
+icalfilterd
