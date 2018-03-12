@@ -136,11 +136,13 @@ func (c *Calendar) FilterBefore(t time.Time) error {
 			}
 			for _, p := range removing {
 				C.icalcomponent_remove_property(event, p)
+				C.icalproperty_free(p)
 			}
 		}
 	}
 	for _, event := range removing {
 		C.icalcomponent_remove_component(c.component, event)
+		C.icalcomponent_free(event)
 	}
 
 	return nil
