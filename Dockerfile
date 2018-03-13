@@ -42,5 +42,6 @@ RUN apk add --no-cache \
 
 COPY --from=builder /gopath/bin/icalfilterd ./
 
-# Use `PORT` envrionment variable to set listening port, which is compatible with Heroku.
-CMD ./icalfilterd -addr 0.0.0.0 -port $PORT
+# Use `PORT` environment variable to set listening port, which is compatible with Heroku.
+# Use 29s for timeout for Heroku H12 request timeout error.
+CMD ./icalfilterd -addr 0.0.0.0 -port $PORT -timeout 29000
