@@ -34,12 +34,6 @@ func writeJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 func main() {
-	// Set flag values from compatible envrionment variables.
-	flag.VisitAll(func(f *flag.Flag) {
-		if s := os.Getenv(strings.ToUpper(f.Name)); s != "" {
-			f.Value.Set(s)
-		}
-	})
 	flag.Parse()
 
 	http.HandleFunc("/filter", func(w http.ResponseWriter, r *http.Request) {
