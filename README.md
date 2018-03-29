@@ -21,4 +21,4 @@ HTTP server
 
 `make docker` creates a `icalfilter` docker image.
 
-`Dockerfile` works on [Heroku](https://www.heroku.com) [Container Registry & Runtime](https://devcenter.heroku.com/articles/container-registry-and-runtime).
+The docker image works on [Heroku](https://www.heroku.com) [Container Registry & Runtime](https://devcenter.heroku.com/articles/container-registry-and-runtime) or [Google App Engine](https://cloud.google.com/appengine/) [Flexible Environment](https://cloud.google.com/appengine/docs/flexible/custom-runtimes/).
