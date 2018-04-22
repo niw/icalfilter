@@ -44,7 +44,7 @@ func writeJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 func main() {
 	flag.Parse()
 
-	f := NewFetcher(cacheDuration)
+	f := NewFetcher(cacheDuration, 10)
 
 	fetchTimeout := time.Duration(*timeout) * time.Millisecond
 	if fetchTimeout > processDuration {

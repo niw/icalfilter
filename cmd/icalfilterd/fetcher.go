@@ -21,8 +21,10 @@ type entry struct {
 }
 
 type Fetcher struct {
-	cache *sync.Map
-	ttl   time.Duration
+	cache     *sync.Map
+	ttl       time.Duration
+	lock      *sync.Map
+	semaphore chan bool
 }
 
 func fetch(url string) result {
@@ -65,18 +67,42 @@ func (f *Fetcher) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 	// Give one buffer size to allow channel is writable even after the context is done.
 	cresult := make(chan result, 1)
 
-	go func() {
-		cresult <- f.fetch(url)
-	}()
+	// Aquire lock for given URL.
+	c, loaded := f.lock.LoadOrStore(url, make(chan bool))
+	clock := c.(chan bool)
+	if loaded {
+		select {
+		case <-clock: // Lock released
+		case <-ctx.Done():
+			return nil, 0, ctx.Err()
+		}
+	} else {
+		defer func() {
+			close(clock)
+			f.lock.Delete(url)
+		}()
+	}
 
 	select {
+	// Aquire semaphore, up to limited channel length.
+	case f.semaphore <- true:
+		go func() {
+			// Release semaphore
+			defer func() { <-f.semaphore }()
+			cresult <- f.fetch(url)
+		}()
+
+		select {
+		case <-ctx.Done():
+			return nil, 0, ctx.Err()
+		case res := <-cresult:
+			return res.body, res.statusCode, res.err
+		}
 	case <-ctx.Done():
 		return nil, 0, ctx.Err()
-	case res := <-cresult:
-		return res.body, res.statusCode, res.err
 	}
 }
 
-func NewFetcher(d time.Duration) *Fetcher {
-	return &Fetcher{&sync.Map{}, d}
+func NewFetcher(d time.Duration, c int) *Fetcher {
+	return &Fetcher{&sync.Map{}, d, &sync.Map{}, make(chan bool, c)}
 }
