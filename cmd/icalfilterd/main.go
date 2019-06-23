@@ -20,13 +20,12 @@ var (
 	port = flag.Int("port", 3000, "Listening port")
 	// Request timeout.
 	timeout = flag.Int64("timeout", 5000, "Response timeout in milliseconds")
+	// Cache duration.
+	cachettl = flag.Int64("cachettl", 300, "Cache expiry duration in seconds")
 )
 
 // Default to filter a calendar by removing 3 months and older events.
 const defaultMonths = 3
-
-// Cache fetch response for this duration.
-const cacheDuration = 5 * time.Minute
 
 // Duration that is reserved for processing.
 const processDuration = 500 * time.Millisecond
@@ -44,6 +43,7 @@ func writeJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 func main() {
 	flag.Parse()
 
+	cacheDuration := time.Duration(*cachettl) * time.Second
 	f := NewFetcher(cacheDuration, 10)
 
 	fetchTimeout := time.Duration(*timeout) * time.Millisecond
