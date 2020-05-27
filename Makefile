@@ -6,8 +6,8 @@ all: $(NAME)
 
 .PHONY: clean
 clean:
-	rm -r libical
-	rm $(TARGET)
+	rm -fr libical
+	rm -f $(TARGET)
 
 libical/lib/libical.a: vendor/libical/CMakeLists.txt
 	mkdir -p libical/build && \
