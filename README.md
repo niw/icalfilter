@@ -17,7 +17,7 @@ Use `make` to build a `icalfiler` CLI command.
 HTTP server
 -----------
 
-`icalfilterd` is a HTTP deamon that filters a large iClaendar file on the fly.
+`icalfilterd` is a HTTP daemon that filters a large iCalendar file on the fly.
 
 `make docker` creates a `icalfilter` docker image.
 
