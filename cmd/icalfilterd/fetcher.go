@@ -67,7 +67,7 @@ func (f *Fetcher) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 	// Give one buffer size to allow channel is writable even after the context is done.
 	cresult := make(chan result, 1)
 
-	// Aquire lock for given URL.
+	// Acquire lock for given URL.
 	c, loaded := f.lock.LoadOrStore(url, make(chan bool))
 	clock := c.(chan bool)
 	if loaded {
@@ -84,7 +84,7 @@ func (f *Fetcher) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 	}
 
 	select {
-	// Aquire semaphore, up to limited channel length.
+	// Acquire semaphore, up to limited channel length.
 	case f.semaphore <- true:
 		go func() {
 			// Release semaphore
