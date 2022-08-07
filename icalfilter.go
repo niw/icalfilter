@@ -2,8 +2,7 @@ package icalfilter
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/libical/include
-#cgo !linux,amd64 LDFLAGS: -L${SRCDIR}/libical/lib -lical
-#cgo linux,amd64 LDFLAGS: -L${SRCDIR}/libical/lib64 -lical
+#cgo LDFLAGS: -L${SRCDIR}/libical/lib -L${SRCDIR}/libical/lib64 -lical
 
 #include <libical/ical.h>
 #include <stdio.h>

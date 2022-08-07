@@ -8,8 +8,9 @@ clean:
 	$(RM) -r libical
 	$(RM) $(TARGET)
 
+# Create lib and lib64 to suppress a linker warning for `-L` flag.
 libical/lib/libical.a: vendor/libical/CMakeLists.txt
-	mkdir -p libical/build && \
+	mkdir -p libical/build libical/lib libical/lib64
 	cd libical/build && \
 	cmake \
 		-DCMAKE_BUILD_TYPE=Debug \
