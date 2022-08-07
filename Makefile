@@ -21,6 +21,7 @@ libical/lib/libical.a: vendor/libical/CMakeLists.txt
 		-DICAL_GLIB=false \
 		-DCMAKE_INSTALL_PREFIX=`pwd`/.. \
 		-DCMAKE_DISABLE_FIND_PACKAGE_ICU=true \
+		-DCMAKE_DISABLE_FIND_PACKAGE_BDB=true \
 		./../../vendor/libical && \
 	$(MAKE) install
 
