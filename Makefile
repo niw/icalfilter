@@ -33,8 +33,8 @@ $(TARGET): libical/lib/libical.a libical/include/libical/ical.h
 
 .PHONY: docker
 docker:
-	docker build -t $(NAME) .
+	docker build --platform linux/amd64 -t $(NAME) .
 
 .PHONY: run
 run: docker
-	docker run --rm -i -t -p 3000:3000 -e PORT=3000 $(NAME)
+	docker run --platform linux/amd64 --rm -i -t -p 3000:3000 -e PORT=3000 $(NAME)
