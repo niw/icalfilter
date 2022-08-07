@@ -1,13 +1,12 @@
 NAME = icalfilter
 TARGET = $(NAME)
 
-.PHONY: all
-all: $(NAME)
+.DEFAULT_GOAL := $(TARGET)
 
 .PHONY: clean
 clean:
-	rm -fr libical
-	rm -f $(TARGET)
+	$(RM) -r libical
+	$(RM) $(TARGET)
 
 libical/lib/libical.a: vendor/libical/CMakeLists.txt
 	mkdir -p libical/build && \
@@ -25,8 +24,11 @@ libical/lib/libical.a: vendor/libical/CMakeLists.txt
 		./../../vendor/libical && \
 	$(MAKE) install
 
-$(TARGET): cmd/$(NAME)/main.go $(NAME).go libical/lib/libical.a libical/include/libical/ical.h
-	go build -o $@ $<
+# Build prerequisite other than libical should be handled by `go build`.
+# Make the goal as a phony goal.
+.PHONY: $(TARGET)
+$(TARGET): libical/lib/libical.a libical/include/libical/ical.h
+	go build -o "$@" ./cmd/icalfilter
 
 .PHONY: docker
 docker:
