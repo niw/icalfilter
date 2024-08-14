@@ -1,3 +1,3 @@
 module github.com/niw/icalfilter
 
-go 1.19
+go 1.22
